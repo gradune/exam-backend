@@ -13,7 +13,7 @@ def load_dataframe(file):
 def parse_students_file(file):
     """
     Parse Excel or CSV file for student registration.
-    Expected columns: email, password,stream,name
+    Expected columns: email, password,stream,name,contact_number,year_of_study,university
     """
     df = load_dataframe(file)
     students = []
