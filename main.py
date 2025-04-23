@@ -80,7 +80,7 @@ def get_questions(category: str, db: Session = Depends(get_db)):
     #print("loggedInUser")
     questions = db.query(models.Question).filter(models.Question.category == category).all()
     random.shuffle(questions)
-    return questions[:50]
+    return questions[:100]
     #return db.query(models.Question).filter_by(category=category).all()
 
 @app.post("/response")
