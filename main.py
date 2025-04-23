@@ -5,12 +5,11 @@ from database import SessionLocal, engine
 from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
 from models import User
-from schemas import AdminCreate
 import pandas as pd
 from utils.excel_parser import parse_students_file, parse_questions_file
 from typing import List
 from models import Question, Response, Result, User
-from schemas import SubmitResponses
+from schemas import SubmitResponses, StudentRegister, AdminCreate
 import random
 import re
 from utils.auth import create_access_token, verify_token
@@ -58,7 +57,6 @@ def login_user(creds: schemas.LoginRequest, db: Session = Depends(get_db)):
     return {"message": "Login successful", "user_type": user.user_type, "user_id": user.id,"name":user.name,"ID":user.user_id, "token":access_token}
 
 @app.post("/upload-questions/{category}")
-
 def upload_questions(category: str, file: UploadFile = File(...), db: Session = Depends(get_db)):
     questions = parse_questions_file(file, category)
     for q in questions:
@@ -74,6 +72,7 @@ def upload_questions(category: str, file: UploadFile = File(...), db: Session = 
         db.add(db_question)
     db.commit()
     return {"message": f"Questions uploaded for {category}"}
+
 @app.get("/questions/{category}")
 def get_questions(category: str, db: Session = Depends(get_db)):
     #, loggedInUser=Depends(get_current_user)
@@ -106,7 +105,6 @@ def get_results(student_id: int, db: Session = Depends(get_db)):
         ]
     }
 
-
 @app.post("/register-admin")
 def register_admin(admin: AdminCreate, db: Session = Depends(get_db)):
     existing = db.query(User).filter(User.email == admin.email).first()
@@ -114,11 +112,47 @@ def register_admin(admin: AdminCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Admin already exists")
 
     hashed_password = pwd_context.hash(admin.password)
-    new_admin = User(email=admin.email, password=hashed_password, user_type="admin")
+    user_id = generate_user_id(db, "ADMIN")
+    new_admin = User(email=admin.email, password=hashed_password, user_type="admin", user_id=user_id)
     db.add(new_admin)
     db.commit()
     db.refresh(new_admin)
     return {"message": "Admin registered successfully", "id": new_admin.id}
+
+@app.post("/register-single-student")
+def register_student(student: StudentRegister, db: Session = Depends(get_db)):
+    existing_user = db.query(models.User).filter(models.User.email == student.email).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="User already registered")
+
+
+    db_stream = db.query(models.Stream).filter(models.Stream.name == student.user_stream).first()
+    if not db_stream:
+        new_stream = models.Stream(name=student.user_stream)
+        db.add(new_stream)
+        db.commit()
+        db.refresh(new_stream)
+
+    hashed_password = pwd_context.hash(student.password)
+    stream = student.user_stream
+    user_id = generate_user_id(db, stream)
+    print(student)
+    new_student = models.User(
+        name=student.name,
+        email=student.email,
+        password=hashed_password,
+        user_type='student',
+        user_stream=student.user_stream,
+        user_id=user_id,
+        contact_number=student.contact_number,
+        university=student.university,
+        year_of_study=student.year_of_study
+    )
+    print(new_student)
+    db.add(new_student)
+    db.commit()
+    db.refresh(new_student)
+    return {"message": "Student registered successfully"}
 
 @app.post("/upload-students")
 def upload_students(file: UploadFile = File(...), db: Session = Depends(get_db)):
@@ -132,7 +166,10 @@ def upload_students(file: UploadFile = File(...), db: Session = Depends(get_db))
             user_type = 'student',
             user_stream = stream, # 
             name = student['name'],
-            user_id = user_id
+            user_id = user_id,
+            contact_number = student['contact_number'],
+            university = student['university'],
+            year_of_study = student['year_of_study']
         )
         db.add(db_student)
     db.commit()
@@ -198,6 +235,7 @@ def submit_responses(payload: SubmitResponses, db: Session = Depends(get_db)):
         "total": total_questions,
         "attempted":attempted
     }
+
 @app.post("/submit-responses-v2")
 async def submit_responses_v2(request: SubmitResponses, db: Session = Depends(get_db)):
     body = await request.json()
@@ -206,7 +244,6 @@ async def submit_responses_v2(request: SubmitResponses, db: Session = Depends(ge
     user_data = verify_token(token)
     if not user_data:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
-
 
 @app.get("/admin-results")
 def get_all_student_results(db: Session = Depends(get_db)):

@@ -12,6 +12,9 @@ class User(Base):
     user_type = Column(String)  # 'admin' or 'student'
     user_stream = Column(String)  # 'commerce, bca, btech-it'
     exam_completed = Column(Boolean, default=False)
+    contact_number = Column(String, nullable=True)
+    university = Column(String, nullable=True)
+    year_of_study = Column(String, nullable=True)
     name = Column(String)
     user_id = Column(String(10), unique=True, index=True, nullable=False)
 

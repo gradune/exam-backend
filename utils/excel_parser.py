@@ -22,7 +22,10 @@ def parse_students_file(file):
             "email": str(row["email"]).strip(),
             "password": str(row["password"]).strip(),
             "stream": str(row["stream"]).strip(),
-            "name": str(row["name"]).strip()
+            "name": str(row["name"]).strip(),
+            "contact_number": str(row["contact_number"]).strip(),
+            "university": str(row["university"]).strip(),
+            "year_of_study": str(row["year_of_study"]).strip()
         }
         students.append(student)
     return students

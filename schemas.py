@@ -1,8 +1,19 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import Dict
 class AdminCreate(BaseModel):
     email: str
     password: str
+
+
+class StudentRegister(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
+    user_type: str ='student' # should be 'student'
+    user_stream: str  # e.g., commerce, bca, btech-it
+    contact_number: str
+    university: str 
+    year_of_study: str # from typing import Dict, Optional Optional[str] = None
 
 class UserCreate(BaseModel):
     email: str
