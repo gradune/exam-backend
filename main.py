@@ -297,7 +297,8 @@ def get_paginated_questions(
         .offset(offset)\
         .limit(limit)\
         .all()
-
+    print(category.strip())
+    print(category)
     total = db.query(models.Question).filter(models.Question.category == category.strip()).count()
 
     return {
