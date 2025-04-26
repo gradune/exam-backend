@@ -293,12 +293,12 @@ def get_paginated_questions(
 ):
     offset = (page - 1) * limit
     questions = db.query(models.Question)\
-        .filter(models.Question.category == category)\
+        .filter(models.Question.category == category.strip())\
         .offset(offset)\
         .limit(limit)\
         .all()
 
-    total = db.query(models.Question).filter(models.Question.category == category).count()
+    total = db.query(models.Question).filter(models.Question.category == category.strip()).count()
 
     return {
         "questions": questions,
