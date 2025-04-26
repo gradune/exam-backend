@@ -78,7 +78,7 @@ def get_questions(category: str, db: Session = Depends(get_db)):
     #, loggedInUser=Depends(get_current_user)
     #print(loggedInUser)
     #print("loggedInUser")
-    questions = db.query(models.Question).filter(models.Question.category == category).all()
+    questions = db.query(models.Question).filter(models.Question.category == category.strip()).all()
     random.shuffle(questions)
     return questions[:250]
     #return db.query(models.Question).filter_by(category=category).all()
