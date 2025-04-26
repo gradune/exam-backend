@@ -54,7 +54,7 @@ def login_user(creds: schemas.LoginRequest, db: Session = Depends(get_db)):
     if user.exam_completed and user.user_type != 'admin':
         raise HTTPException(status_code=403, detail="You have already completed the exam.")
     access_token = create_access_token(data={"sub": user.email, "user_type": user.user_type, "id": user.id})
-    return {"message": "Login successful", "user_type": user.user_type, "user_id": user.id,"name":user.name,"ID":user.user_id, "token":access_token}
+    return {"message": "Login successful", "user_type": user.user_type, "user_id": user.id,"name":user.name,"ID":user.user_id, "token":access_token, "user_stream": user.user_stream}
 
 @app.post("/upload-questions/{category}")
 def upload_questions(category: str, file: UploadFile = File(...), db: Session = Depends(get_db)):
