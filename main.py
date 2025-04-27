@@ -266,12 +266,12 @@ def get_all_student_results(db: Session = Depends(get_db)):
         student_data.append({
             "id": user.id,
             "email": user.email,
+            "name": user.name,
             "stream": user.user_stream,
             "status": status,
             "score": score,
             "total": total
         })
-
     return student_data
 
 @app.delete("/questions/{question_id}")
@@ -353,7 +353,8 @@ def create_stream(stream: schemas.StreamCreate, db: Session = Depends(get_db)):
     return new_stream
 
 @app.get("/streams/", response_model=List[str])
-def get_all_streams(db: Session = Depends(get_db), loggedInUser = Depends(get_current_user)):
+#, loggedInUser = Depends(get_current_user)
+def get_all_streams(db: Session = Depends(get_db)): 
     streams = db.query(models.Stream).all()
     return [s.name for s in streams]
 
