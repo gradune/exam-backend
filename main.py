@@ -367,6 +367,10 @@ def delete_stream(stream_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Stream deleted successfully"}
 
+@app.get("/admin-results-count")
+def get_all_student_results(db: Session = Depends(get_db)):
+    return db.query(User).filter(User.user_type == "student", User.exam_completed == 'true').count()
+
 @app.put("/streams/{stream_id}", response_model=schemas.StreamOut)
 def update_stream(stream_id: int, updated: schemas.StreamUpdate, db: Session = Depends(get_db)):
     stream = db.query(models.Stream).filter(models.Stream.id == stream_id).first()
